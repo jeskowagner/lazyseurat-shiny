@@ -28,24 +28,24 @@ DimReductionOutput <- function(id) {
         selectizeInput(
           inputId = ns("color_by"),
           label = "Color by:",
-          choices = c("nothing", "metadata", "genes"),
+          choices = c("Nothing", "Metadata", "Gene expression"),
           options = list(placeholder = "Color by"),
-          selected = "nothing"
+          selected = "Nothing"
         ),
         conditionalPanel(
-          condition = "input.color_by == 'metadata'",
+          condition = "input.color_by == 'Metadata'",
           {
             selectizeInput(
               inputId = ns("color_by_metadata"),
               label = "Color by metadata:",
               choices = NULL,
-              options = list(placeholder = "Metadata")
+              options = list(placeholder = "Metadata column")
             )
           },
           ns = ns # Required for correct namespacing
         ),
         conditionalPanel(
-          condition = "input.color_by == 'genes'",
+          condition = "input.color_by == 'Gene expression'",
           {
             selectizeInput(
               inputId = ns("color_by_gene"),
@@ -89,9 +89,9 @@ DimReductionServer <- function(id) {
     # Placeholder for plot output
     output$dim_red <- renderPlot(
       {
-        if(input$color_by == "metadata") {
+        if(input$color_by == "Metadata") {
           color_by_column <- input$color_by_metadata
-        } else if (input$color_by == "genes") {
+        } else if (input$color_by == "Gene expression") {
           color_by_column <- input$color_by_gene
         } else {
             color_by_column <- NULL
@@ -101,7 +101,7 @@ DimReductionServer <- function(id) {
           reduction = input$dim_red_method,
           group.by = color_by_column,
           group.by.table = input$expr_input,
-          shuffle = TRUE
+          shuffle = FALSE
         )
       },
       height = 700,

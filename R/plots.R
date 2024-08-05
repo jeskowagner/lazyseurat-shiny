@@ -91,7 +91,7 @@ DimPlot <- function(db_file,
                     raster = NULL,
                     raster.dpi = c(512, 512),
                     group.by.table = "counts",
-                    log = TRUE,
+                    log = FALSE,
                     ...) {
   req(db_file, reduction, group.by.table)
   df <- read_dim_reduction(db_file, table = reduction)
