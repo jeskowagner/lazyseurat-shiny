@@ -6,6 +6,7 @@ source("R/ui.R")
 
 # Best practice options for shiny
 options(shiny.sanitize.errors = TRUE)
+options(shiny.reactlog = TRUE)
 
 # Path to database
 db_file <- "seurat.duckdb"
@@ -51,15 +52,7 @@ get_default_tabs <- function(db_file) {
           )
         ),
 
-        # Selecting gene
-        fluidRow(
-          selectizeInput(
-            inputId = "genes",
-            label = "Color by gene:",
-            choices = NULL,
-            options = list(maxItems = 1, maxOptions = 5, placeholder = "Gene name")
-          )
-        ),
+
 
         # Select whether to log transform expression
         fluidRow(

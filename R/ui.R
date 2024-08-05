@@ -26,15 +26,35 @@ DimReductionOutput <- function(id) {
           options = list(placeholder = "Count table")
         ),
         selectizeInput(
-          inputId = ns("genes"),
-          label = "Color by gene:",
-          choices = NULL,
-          options = list(maxItems = 1, maxOptions = 5, placeholder = "Gene name")
+          inputId = ns("color_by"),
+          label = "Color by:",
+          choices = c("nothing", "metadata", "genes"),
+          options = list(placeholder = "Color by"),
+          selected = "nothing"
         ),
-        checkboxInput(
-          inputId = ns("log_expr"),
-          label = "Log1p transform expression",
-          value = FALSE
+        conditionalPanel(
+          condition = "input.color_by == 'metadata'",
+          {
+            selectizeInput(
+              inputId = ns("color_by_metadata"),
+              label = "Color by metadata:",
+              choices = NULL,
+              options = list(placeholder = "Metadata")
+            )
+          },
+          ns = ns # Required for correct namespacing
+        ),
+        conditionalPanel(
+          condition = "input.color_by == 'genes'",
+          {
+            selectizeInput(
+              inputId = ns("color_by_gene"),
+              label = "Color by gene:",
+              choices = NULL,
+              options = list(maxItems = 1, maxOptions = 5, placeholder = "Gene name")
+            )
+          },
+          ns = ns # Required for correct namespacing
         )
       )
     )
@@ -56,22 +76,31 @@ DimReductionServer <- function(id) {
     updateSelectizeInput(session, "dim_red_method", choices = embedding_names, selected = embedding_names[1])
     updateSelectizeInput(session, "expr_input", choices = count_names, selected = count_names[1])
 
-    # Observe changes to expr_input and update `genes` input
+    # Observe changes to expr_input and update `color_by_gene` input
     observeEvent(input$expr_input, {
       gene_names <- read_gene_names(db_file, input$expr_input)
-      updateSelectizeInput(session, "genes", choices = gene_names, server = TRUE)
+      updateSelectizeInput(session, "color_by_gene", choices = gene_names, server = TRUE)
     })
 
-    updateCheckboxInput(session, "log_expr", value = FALSE)
+    # Observe changes to color_by input and update `color_by_metadata` input
+    metadata_names <- read_metadata_names(db_file)
+    updateSelectizeInput(session, "color_by_metadata", choices = metadata_names, server = TRUE)
 
     # Placeholder for plot output
     output$dim_red <- renderPlot(
       {
+        if(input$color_by == "metadata") {
+          color_by_column <- input$color_by_metadata
+        } else if (input$color_by == "genes") {
+          color_by_column <- input$color_by_gene
+        } else {
+            color_by_column <- NULL
+        }
+
         DimPlot(db_file,
           reduction = input$dim_red_method,
-          group.by = input$genes,
+          group.by = color_by_column,
           group.by.table = input$expr_input,
-          log = input$log_expr,
           shuffle = TRUE
         )
       },

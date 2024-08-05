@@ -58,3 +58,14 @@ read_gene_names <- function(db_file, table = get_default_count_layer(db_file), o
   }
   return(gene_names)
 }
+
+read_metadata_names <- function(db_file, max_unique_entries=50) {
+  req(db_file)
+  con <- withr::local_db_connection(get_connection(db_file))
+  metadata_names <- tbl(con, Id(schema = "metadata", table = "metadata")) %>%
+    collect() %>%
+    # remove columns with many unique entries, but only if they are not numeric
+    select_if(~n_distinct(.) <= max_unique_entries || is.numeric(.)) %>%
+    names()
+  return(metadata_names)
+}
