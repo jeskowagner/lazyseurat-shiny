@@ -1,163 +1,112 @@
+## Setup
 library(shiny)
 library(ggplot2)
 library(lazyseurat)
-# Avoid leaking error message details to users
+source("R/ui.R")
+
+# Best practice options for shiny
 options(shiny.sanitize.errors = TRUE)
 
-con <- get_connection("seurat.duckdb")
-initalizeOptions(con)
-#######
-# App #
-#######
+# Path to database
+db_file <- "seurat.duckdb"
+
+get_default_tabs <- function(db_file) {
+  count_names <- get_tables_in_schema(db_file, "layer")
+  embedding_names <- get_tables_in_schema(db_file, "embedding")
+
+  tabs <- list()
+
+  tabs[["Dimensionality Reduction"]] <- list(
+    strong("Dimensionality Reduction"),
+    fluidRow(
+      # Show plot
+      column(
+        8,
+        mainPanel(plotOutput("dim_red"), width = "100%")
+      ),
+
+      # Show options
+      column(
+        4,
+
+        # Selecting dim reduction method
+        fluidRow(
+          selectizeInput(
+            inputId = "dim_red_method",
+            label = "Select dimensionality reduction:",
+            choices = embedding_names,
+            selected = embedding_names[1],
+            options = list(placeholder = "Dimensionality reduction")
+          )
+        ),
+
+        # Selecting count table
+        fluidRow(
+          selectizeInput(
+            inputId = "expr_input",
+            label = "Select count table:",
+            choices = count_names,
+            selected = count_names[1],
+            options = list(placeholder = "Count table")
+          )
+        ),
+
+        # Selecting gene
+        fluidRow(
+          selectizeInput(
+            inputId = "genes",
+            label = "Color by gene:",
+            choices = NULL,
+            options = list(maxItems = 1, maxOptions = 5, placeholder = "Gene name")
+          )
+        ),
+
+        # Select whether to log transform expression
+        fluidRow(
+          checkboxInput(
+            inputId = "log_expr",
+            label = "Log1p transform expression",
+            value = FALSE
+          )
+        )
+      )
+    )
+  )
+
+  tabs
+}
+
+# Get default tab UI
+tabs <- get_default_tabs(db_file)
 
 ui <- fluidPage(
-    titlePanel("Mouse Pulmonary Hypertension scRNA-seq"),
-    tabsetPanel(
-        tabPanel(
-            strong("Dataset Info"),
-            br(), br(),
-            fluidRow(
-                column(
-                    12, p("This single-cell RNA-sequencing dataset has been generated using endothelial cells isolated from an in vivo model of Sugen 5416/Hypoxia-induced Pulmonary Hypertension in mice, and control mice. In order to specifically study endothelial cells, a tamoxifen-inducible Cdh5-CreERT2-TdTomato transgenic mouse line was used."),
-                    HTML("<p>The figure below shows the experimental design of this dataset. More information is available in our <a href='https://doi.org/10.1093/cvr/cvab296'>publication</a>.<p>")
-                )
-            ), hr(),
-            fluidRow(
-                column(12, h4(strong("Experimental Design")))
-            ), br(),
-            fluidRow(
-                column(12, imageOutput("exp_design"))
-            )
-        ),
-        tabPanel(
-            strong("UMAP"),
-            fluidRow(
-                headerPanel(h3(strong("Integrated Control + PAH"))),
-                column(5, imageOutput("umap")),
-                column(7, mainPanel(plotOutput("plot_gene"), width = "100%"))
-            ),
-            hr(),
-            fluidRow(
-                column(3, checkboxGroupInput(
-                    inputId = "vessel", label = "Select endothelial population:",
-                    choices = list("Capillary A", "Capillary B", "Artery", "Vein", "Lymphatic", "Proliferating", "Sftp+"),
-                    selected = list("Capillary A", "Capillary B", "Artery", "Vein", "Lymphatic", "Proliferating", "Sftp+")
-                )),
-                column(3, checkboxInput(inputId = "replicates", label = "Show replicates", value = TRUE)),
-                column(3, selectizeInput(inputId = "gene", label = "Enter gene name:", choices = NULL, options = list(maxItems = 1, maxOptions = 5))),
-                column(3, downloadButton("download.plot", label = "Download plot"))
-            )
-        ),
-        tabPanel(
-            strong("Arteriovenous Axis"),
-            headerPanel(h3(strong("Integrated Control and PAH"))),
-            sidebarLayout(
-                sidebarPanel(
-                    p("An error message will be shown if the selected gene is not expressed in any cell."),
-                    selectizeInput(inputId = "gene2", label = "Enter gene name:", choices = NULL, options = list(maxItems = 1, maxOptions = 5)),
-                    hr(), downloadButton("download.axis", label = "Download plot")
-                ),
-                mainPanel(
-                    plotOutput("plot_axis"), br(),
-                    imageOutput("arteriovenous_axis")
-                )
-            )
-        ),
-        tabPanel(
-            strong("Markers"),
-            br(),
-            sidebarLayout(
-                sidebarPanel(
-                    radioButtons(inputId = "dataset2", label = "Choose a dataset:", choices = c("Control", "PAH", "Control and PAH")),
-                    hr(), downloadButton("download.table", label = "Download table")
-                ),
-                mainPanel(
-                    DT::dataTableOutput("markers")
-                )
-            )
-        )
-    )
+  titlePanel("lazyseurat-app template"),
+
+  # Add tabs into page
+  tabsetPanel(
+    do.call(tabPanel, tabs[["Dimensionality Reduction"]])
+  )
 )
 
-
+## Define server logic
 server <- function(input, output, session) {
+  # Observe changes to expr_input and update `genes` input
+  observeEvent(input$expr_input, {
+    gene_names <- read_gene_names(db_file, input$expr_input)
+    updateSelectizeInput(session, "genes", choices = gene_names, server = TRUE)
+  })
 
-    ########
-    # UMAP #
-    ########
-    output$exp_design <- renderImage(list(src = EXP_DESIGN_PNG), deleteFile = FALSE)
-
-    output$umap <- renderImage(list(src = UMAP_PNG, width = 390, height = 400), deleteFile = FALSE)
-
-    updateSelectizeInput(session, "gene", choices = gene.list, server = TRUE)
-
-    output$plot_gene <- renderPlot({
-        plotGene(file = PAH_ARROW, gene = input$gene, vessel = input$vessel, replicates = input$replicates)
-    })
-
-    output$download.plot <- downloadHandler(
-        filename = function() {
-            paste(input$gene, "_plot.png", sep = "")
-        },
-        content = function(file) {
-            ggsave(file,
-                plotGene(
-                    file = PAH_ARROW,
-                    gene = input$gene,
-                    vessel = input$vessel,
-                    replicates = input$replicates
-                ),
-                width = 10,
-                height = 8,
-                units = "in"
-            )
-        }
-    )
-
-    ######################
-    # ARTERIOVENOUS AXIS #
-    ######################
-    output$arteriovenous_axis <- renderImage(list(src = ARTERIOVENOUS_PNG), deleteFile = FALSE)
-
-    updateSelectizeInput(session, "gene2", choices = gene.list, server = TRUE)
-
-    output$plot_axis <- renderPlot({
-        plotAxis(data = PSEUDOTIME_ARROW, gene = input$gene2)
-    })
-
-    output$download.axis <- downloadHandler(
-        filename = function() {
-            paste(input$gene2, "_axis.plot.png", sep = "")
-        },
-        content = function(file) {
-            ggsave(file, plotAxis(), width = 20, height = 8, units = "in")
-        }
-    )
-
-    ###########
-    # MARKERS #
-    ###########
-
-    dataInput2 <- reactive(
-        switch(input$dataset2,
-            "Control" = control_marker.names,
-            "PAH" = pah_marker.names,
-            "Control and PAH" = pah.combined_marker.names
-        )
-    )
-
-    output$markers <- DT::renderDataTable({
-        dataInput2()
-    })
-
-    output$download.table <- downloadHandler(
-        filename = function() {
-            paste(input$dataset2, "_marker.genes.csv", sep = "")
-        },
-        content = function(file) {
-            write.csv(dataInput2(), file, row.names = FALSE)
-        }
-    )
+  output$dim_red <- renderPlot(
+    {
+      DimPlot(db_file,
+        reduction = input$dim_red_method,
+        group.by = input$genes,
+        group.by.table = input$expr_input,
+        log = input$log_expr
+      )
+    },
+    height = 700,
+  )
 }
 
 shinyApp(ui = ui, server = server)
