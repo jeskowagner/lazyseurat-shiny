@@ -66,7 +66,7 @@ DimReductionServer <- function(id) {
   moduleServer(id, function(input, output, session) {
     db_file <- "seurat.duckdb"
 
-    ns <- session$ns
+    ns <- NS(id)
 
     # Read schema names
     count_names <- get_tables_in_schema(db_file, "layer")
@@ -83,7 +83,7 @@ DimReductionServer <- function(id) {
     })
 
     # Observe changes to color_by input and update `color_by_metadata` input
-    metadata_names <- read_metadata_names(db_file)
+    metadata_names <- read_metadata_names(db_file, max_unique_entries=Inf, include_numeric=TRUE)
     updateSelectizeInput(session, "color_by_metadata", choices = metadata_names, server = TRUE)
 
     # Placeholder for plot output
@@ -103,6 +103,77 @@ DimReductionServer <- function(id) {
           group.by.table = input$expr_input,
           shuffle = FALSE
         )
+      },
+      height = 700,
+    )
+  })
+}
+
+
+
+ViolinPlotOutput <- function(id) {
+  ns <- NS(id)
+  tagList(
+    fluidRow(
+      column(
+        8,
+        fluidRow(
+            mainPanel(plotOutput(ns("violin_plot")), width = "100%"),
+        )
+      ),
+      column(
+        4,
+        selectizeInput(
+          inputId = ns("expr_input"),
+          label = "Select count table:",
+          choices = NULL, # Choices will be set in the server function
+          selected = NULL,
+          options = list(placeholder = "Count table")
+        ),
+        selectizeInput(
+          inputId = ns("violin_gene"),
+          label = "Select gene:",
+          choices = NULL, # Choices will be set in the server function
+          options = list(maxItems = 1, maxOptions = 5, placeholder = "Gene name")
+        ),
+        selectizeInput(
+              inputId = ns("color_by"),
+              label = "Color by metadata:",
+              choices = NULL,
+              options = list(placeholder = "Metadata column")
+        ),
+        selectizeInput(
+              inputId = ns("split_x"),
+              label = "Separate on x-axis:",
+              choices = NULL,
+              options = list(placeholder = "Metadata column")
+        ),
+
+      )
+    )
+  )
+}
+
+ViolinPlotServer <- function(id) {
+  ns <- NS(id)
+  moduleServer(id, function(input, output, session) {
+    db_file <- "seurat.duckdb"
+
+    # Read schema names
+    count_names <- get_tables_in_schema(db_file, "layer")
+
+    # Update selectizeInput choices
+    updateSelectizeInput(session, "expr_input", choices = count_names, selected = count_names[1], server = TRUE)
+    updateSelectizeInput(session, "violin_gene", choices = read_gene_names(db_file), selected = read_gene_names(db_file)[1], server = TRUE)
+
+    metadata_columns <- read_metadata_names(db_file, include_numeric=FALSE)
+    updateSelectizeInput(session, "color_by", choices = metadata_columns, server = TRUE)
+    updateSelectizeInput(session, "split_x", choices = metadata_columns, server = TRUE)
+
+    # Placeholder for plot output
+    output$violin_plot <- renderPlot(
+      {
+        VlnPlot(db_file, gene = input$violin_gene, split.by = input$color_by, x=input$split_x, table = input$expr_input)
       },
       height = 700,
     )

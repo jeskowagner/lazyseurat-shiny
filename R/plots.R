@@ -37,12 +37,34 @@ plot.theme_vln <- function() {
     )
 }
 
-VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL) {
-  require(shiny)
-  require(ggplot2)
+#' VlnPlot
+#'
+#' Generates a violin plot for gene expression data.
+#'
+#' @param db_file A string representing the path to the database file containing gene expression data.
+#' @param gene A string representing the gene for which the expression data is to be plotted.
+#' @param x (Optional) A string representing the variable to be used for the x-axis. Default is NULL.
+#' @param split.by (Optional) A string representing the variable to be used for splitting the fill color. Default is NULL.
+#' @param table A string representing the table to use for gene expression data. Default is "counts".
+#' @return A ggplot2 object representing the violin plot of gene expression.
+#'
+#' @examples
+#' # Example usage:
+#' # db_file <- "path/to/database/file"
+#' # gene <- "GeneName"
+#' # VlnPlot(db_file, gene)
+#' # VlnPlot(db_file, gene, x = "CellType")
+#' # VlnPlot(db_file, gene, x = "CellType", split.by = "Condition")
+#'
+#' @import shiny
+#' @import ggplot2
+#' @export
+VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL, table="counts") {
   req(db_file, gene)
-
-  df <- read_gene_expression(db_file, gene)
+  # if(!is.null(x) && !is.null(split.by) && x == split.by) {
+  #   x <- NULL
+  # }
+  df <- read_gene_expression(db_file, gene = gene, table = table)
 
   if (!is.numeric(df[[gene]])) {
     df[[gene]] <- as.numeric(df[[gene]])
@@ -83,6 +105,20 @@ VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL) {
 #' @details This function reads the dimensionality reduction data from the specified table in the database,
 #'          db_filestructs a ggplot object with the specified aesthetics, and optionally applies rasterization
 #'          for large datasets to improve performance.
+#'
+#'
+#' @examples
+#' # Example usage:
+#  # db_file <- "path/to/database/file"
+#' # Generate a UMAP plot grouped by "cell_type":
+#' # DimPlot(db_file = db_file, reduction = "umap", group.by = "cell_type")
+#'
+#' # Generate a PCA plot with points shaped by "condition" and grouped by "cell_type":
+#' # DimPlot(db_file = db_file, reduction = "pca", group.by = "cell_type", shape.by = "condition")
+#'
+#' # Generate a UMAP plot with rasterization for large datasets:
+#' # DimPlot(db_file = db_file, reduction = "umap", raster = TRUE, raster.dpi = c(300, 300))
+#'
 DimPlot <- function(db_file,
                     reduction = "umap",
                     group.by = NULL,
