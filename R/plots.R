@@ -59,7 +59,7 @@ plot.theme_vln <- function() {
 #' @import shiny
 #' @import ggplot2
 #' @export
-VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL, table="counts") {
+VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL, table = "counts") {
   req(db_file, gene)
   # if(!is.null(x) && !is.null(split.by) && x == split.by) {
   #   x <- NULL
@@ -129,7 +129,7 @@ DimPlot <- function(db_file,
                     group.by.table = "counts",
                     log = FALSE,
                     ...) {
-  req(db_file, reduction, group.by.table)
+  req(db_file, reduction)
   df <- read_dim_reduction(db_file, table = reduction)
   if (isTRUE(raster) || nrow(df) > 100000) {
     require(scattermore)
@@ -184,4 +184,66 @@ DimPlot <- function(db_file,
   }
 
   return(p)
+}
+
+
+#' @author Seurat Team
+.percent_above <- function(x, threshold) {
+  return(100 * sum(x > threshold, na.rm = T) / length(x))
+}
+
+.aggregate_dotplot <- function(df, gene, split.by = NULL) {
+  group.by <- if (is.null(split.by)) "gene" else c("gene", split.by)
+
+  # average expression and percent expressed
+  df %>%
+    tidyr::pivot_longer(cols = gene, names_to = "gene", values_to = "value") %>%
+    mutate(value = as.numeric(value)) %>%
+    group_by(!!!syms(group.by)) %>%
+    summarise(
+      avg_exp = mean(expm1(value)),
+      percent_expressed = .percent_above(value, 0),
+      .groups = "drop"
+    ) %>%
+      mutate(across(all_of(group.by), as.factor))
+}
+
+#' DotPlot
+#'
+#' Generates a dot plot for gene expression data.
+#'
+#' @param db_file A string representing the path to the database file containing gene expression data.
+#' @param gene A string representing the gene for which the expression data is to be plotted.
+#' @param split.by An optional string representing the variable to split the y-axis by. Default is NULL.
+#' @param table A string representing the table name in the database from which to read the gene expression data. Default is "counts".
+#'
+#' @return A ggplot2 object representing the dot plot of gene expression.
+#'
+#' @details This function reads gene expression data from the specified table in the database, aggregates the data for the dot plot,
+#'          and constructs a ggplot object with the specified aesthetics. The dot plot shows the average expression level and the
+#'          percentage of cells expressing the gene.
+#'
+DotPlot <- function(db_file, gene, split.by = NULL, table = "counts") {
+  req(db_file, gene, split.by, table)
+  df <- read_gene_expression(db_file, gene = gene, table = table)
+
+  df_agg <- .aggregate_dotplot(df, gene, split.by)
+
+  aesthetics <- aes(
+    y = "Expression",
+    x = gene,
+    color = avg_exp,
+    size = percent_expressed
+  )
+
+  if (!is.null(split.by)) {
+    aesthetics <- modifyList(aesthetics, aes(y = .data[[split.by]]))
+  }
+  ggplot(df_agg, aesthetics) +
+    geom_point() +
+    scale_color_gradient(low = "lightgrey", high = "blue") +
+    labs(color = "Expression Level", x = "Gene", size = "Percent Expressed") +
+    base.plot.theme() +
+    theme_classic(base_size = 20) +
+    theme(text = element_text(color = "black"), axis.title.y = element_blank())
 }

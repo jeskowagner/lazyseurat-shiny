@@ -1,0 +1,39 @@
+// File taken from https://github.com/espm-157/devcontainers-rstudio/
+{
+    "name": "lazyseurat shiny app",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "r.rterm.linux": "/usr/local/bin/radian",
+                "r.bracketedPaste": true,
+                "r.plot.useHttpgd": true,
+                "[r]": {
+                    "editor.wordSeparators": "`~!@#%$^&*()-=+[{]}\\|;:'\",<>/?"
+                }
+            },
+            "extensions": [
+                "reditorsupport.r",
+                "rdebugger.r-debugger",
+                "quarto"
+            ]
+        }
+    },
+    // Forward Jupyter and RStudio ports
+    "forwardPorts": [
+        8787
+    ],
+    "portsAttributes": {
+        "8787": {
+            "label": "Rstudio",
+            "requireLocalPort": true,
+            "onAutoForward": "ignore"
+        }
+    },
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": "sudo rstudio-server start",
+    "postAttachCommand": "sudo rstudio-server start",
+    "remoteUser": "rstudio"
+}
