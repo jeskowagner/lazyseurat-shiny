@@ -5,7 +5,7 @@ library(lazyseurat)
 source("R/ui.R")
 
 # Best practice options for shiny
-options(shiny.sanitize.errors = FALSE)
+options(shiny.sanitize.errors = TRUE)
 
 LazyseuratApp <- function(db="seurat.duckdb") {
   ui <- fluidPage(
