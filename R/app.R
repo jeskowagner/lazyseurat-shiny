@@ -7,7 +7,7 @@ source("R/ui.R")
 # Best practice options for shiny
 options(shiny.sanitize.errors = FALSE)
 
-LazyseuratApp <- function() {
+LazyseuratApp <- function(db="seurat.duckdb") {
   ui <- fluidPage(
     titlePanel("lazyseurat-app template"),
     tabsetPanel(
@@ -27,12 +27,14 @@ LazyseuratApp <- function() {
   )
 
   server <- function(input, output, session) {
-    DimReductionServer("dim_red")
-    ViolinPlotServer("vln_plot")
-    DotPlotServer("dot_plot")
+    DimReductionServer("dim_red", db_file=db)
+    ViolinPlotServer("vln_plot", db_file=db)
+    DotPlotServer("dot_plot", db_file=db)
   }
 
   shinyApp(ui = ui, server = server)
 }
 
-LazyseuratApp()
+example_db <- system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat")
+
+LazyseuratApp(example_db)

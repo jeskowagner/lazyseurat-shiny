@@ -64,10 +64,8 @@ DimReductionOutput <- function(id) {
 }
 
 
-DimReductionServer <- function(id) {
+DimReductionServer <- function(id, db_file="seurat.duckdb") {
   moduleServer(id, function(input, output, session) {
-    db_file <- "seurat.duckdb"
-
     ns <- NS(id)
 
     # Read schema names
@@ -155,10 +153,9 @@ ViolinPlotOutput <- function(id) {
   )
 }
 
-ViolinPlotServer <- function(id) {
+ViolinPlotServer <- function(id, db_file="seurat.duckdb") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
-    db_file <- "seurat.duckdb"
 
     # Read schema names
     count_names <- get_tables_in_schema(db_file, "layer")
@@ -218,11 +215,9 @@ DotPlotOutput <- function(id) {
   )
 }
 
-DotPlotServer <- function(id) {
+DotPlotServer <- function(id, db_file="seurat.duckdb") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
-    db_file <- "seurat.duckdb"
-
     # Read schema names
     count_names <- get_tables_in_schema(db_file, "layer")
 
