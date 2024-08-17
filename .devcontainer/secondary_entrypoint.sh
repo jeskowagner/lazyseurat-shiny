@@ -1,0 +1,1 @@
+Rscript -e 'shiny::runApp("/home/mambauser/app/", port=3838, launch.browser=FALSE)'
