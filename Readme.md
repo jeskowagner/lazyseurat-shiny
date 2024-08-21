@@ -21,3 +21,5 @@ lazyseurat::write_seurat_to_db(seurat_object, "/path/to/your/duckdb")
 # then run the Shiny app with the resulting database
 lazyseuratShiny::runLazySeuratShiny("/path/to/your/duckdb")
 ```
+
+**Note:** because the data that ships with `lazyseurat` is very minimal, not all features of the app will work with the default data. For a full experience, use your own data.
