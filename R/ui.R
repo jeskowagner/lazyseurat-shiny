@@ -119,15 +119,16 @@ DimReductionOutput <- function(id) {
 #' # shinyApp(ui, server)
 #'
 #' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
-#' @importFrom lazyseurat get_tables_in_schema read_gene_names read_metadata_names
+#' @importFrom lazyseurat get_tables_in_schema
+#'
 #' @export
 DimReductionServer <- function(id, db_file = "seurat.duckdb") {
   moduleServer(id, function(input, output, session) {
     ns <- NS(id)
 
     # Read schema names
-    count_names <- get_tables_in_schema(db_file, "layer")
-    embedding_names <- get_tables_in_schema(db_file, "embedding")
+    count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")
+    embedding_names <- lazyseurat::get_tables_in_schema(db_file, "embedding")
 
     # Update selectizeInput choices
     updateSelectizeInput(session, "dim_red_method", choices = embedding_names, selected = embedding_names[1])
@@ -140,7 +141,7 @@ DimReductionServer <- function(id, db_file = "seurat.duckdb") {
     })
 
     # Observe changes to color_by input and update `color_by_metadata` input
-    metadata_names <- read_metadata_names(db_file, max_unique_entries = 50, include_numeric = TRUE)
+    metadata_names <- lazyseurat::read_metadata_names(db_file, max_unique_entries = 50, include_numeric = TRUE)
     updateSelectizeInput(session, "color_by_metadata", choices = metadata_names, server = TRUE)
 
     # Placeholder for plot output
@@ -266,13 +267,13 @@ ViolinPlotOutput <- function(id) {
 #' # shinyApp(ui, server)
 #'
 #' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
-#' @importFrom lazyseurat get_tables_in_schema read_gene_names read_metadata_names
+#' @importFrom lazyseurat get_tables_in_schema
 #' @export
 ViolinPlotServer <- function(id, db_file = "seurat.duckdb") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     # Read schema names
-    count_names <- get_tables_in_schema(db_file, "layer")
+    count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")
 
     # Update selectizeInput choices
     updateSelectizeInput(session, "expr_input", choices = count_names, selected = count_names[1], server = TRUE)
@@ -387,14 +388,14 @@ DotPlotOutput <- function(id) {
 #'
 #' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
 #' @importFrom shinyWidgets updateMultiInput
-#' @importFrom lazyseurat read_gene_names get_tables_in_schema read_metadata_names
+#' @importFrom lazyseurat get_tables_in_schema
 #' @importFrom gtools mixedsort
 #' @export
 DotPlotServer <- function(id, db_file = "seurat.duckdb") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     # Read schema names
-    count_names <- get_tables_in_schema(db_file, "layer")
+    count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")
 
     # Update selectizeInput choices
     updateSelectizeInput(session, "expr_input", choices = count_names, selected = count_names[1], server = TRUE)
