@@ -1,0 +1,25 @@
+Package: lazyseuratShiny
+Title: Template for Shiny app to visualise single-cell data with lazyseurat
+Version: 0.2.0
+Authors@R:
+    person("Jesko", "Wagner", , "jesko.wagner@ed.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-9805-7192"))
+Description: lazyseurat allows to import and export Seurat objects to and from
+    file-backed storage. This app template uses lazyseurat to visualise
+    single-cell RNAseq data. Note that lazyseurat is not meant to be used during
+    analysis, but rather for data visualisation on research dissemination
+    platforms, where it can save computational costs.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    DBI
+Depends:
+    SeuratObject,
+    data.table,
+    dplyr,
+    janitor,
+    stringr,
+    duckdb,
+    lazyseurat

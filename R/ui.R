@@ -1,6 +1,33 @@
-library(shiny)
-
-
+#' DimReductionOutput
+#'
+#' Creates a UI component for displaying dimensionality reduction plots with options to color by metadata or gene expression.
+#'
+#' @param id A string representing the namespace ID for the UI component.
+#'
+#' @return A UI component (tagList) containing the layout for the dimensionality reduction plot and associated input controls.
+#'
+#' @details This function generates a UI layout for displaying a dimensionality reduction plot. It includes:
+#' - A plot output for the dimensionality reduction plot.
+#' - A selectize input for choosing the dimensionality reduction method.
+#' - A selectize input for choosing the coloring method (Nothing, Metadata, or Gene expression).
+#' - Conditional panels for additional inputs based on the selected coloring method:
+#'   - If "Metadata" is selected, a selectize input for choosing the metadata column.
+#'   - If "Gene expression" is selected, selectize inputs for choosing the gene and the count table.
+#'
+#' @examples
+#' # Example usage in a Shiny app:
+#' # ui <- fluidPage(
+#' #   DimReductionOutput("dim_red_ui")
+#' # )
+#' #
+#' # server <- function(input, output, session) {
+#' #   # Server logic to populate choices and render plot
+#' # }
+#' #
+#' # shinyApp(ui, server)
+#'
+#' @importFrom shiny NS tagList fluidRow column mainPanel plotOutput selectizeInput conditionalPanel
+#' @export
 DimReductionOutput <- function(id) {
   ns <- NS(id)
   tagList(
@@ -63,8 +90,37 @@ DimReductionOutput <- function(id) {
   )
 }
 
-
-DimReductionServer <- function(id, db_file="seurat.duckdb") {
+#' DimReductionServer
+#'
+#' Server logic for handling dimensionality reduction plots in a Shiny app.
+#'
+#' @param id A string representing the namespace ID for the server module.
+#' @param db_file A string representing the path to the database file containing the data. Default is "seurat.duckdb".
+#'
+#' @return A Shiny module server function.
+#'
+#' @details This function sets up the server-side logic for a dimensionality reduction plot module in a Shiny app. It performs the following tasks:
+#' - Reads schema names for count and embedding tables from the database.
+#' - Updates the choices for the dimensionality reduction method and expression input selectize inputs.
+#' - Observes changes to the expression input and updates the gene names for coloring by gene expression.
+#' - Observes changes to the coloring method and updates the metadata names for coloring by metadata.
+#' - Renders the dimensionality reduction plot based on the selected inputs.
+#'
+#' @examples
+#' # Example usage in a Shiny app:
+#' # ui <- fluidPage(
+#' #   DimReductionOutput("dim_red_ui")
+#' # )
+#' #
+#' # server <- function(input, output, session) {
+#' #   DimReductionServer("dim_red_ui", db_file = "path/to/database/file")
+#' # }
+#' #
+#' # shinyApp(ui, server)
+#'
+#' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @export
+DimReductionServer <- function(id, db_file = "seurat.duckdb") {
   moduleServer(id, function(input, output, session) {
     ns <- NS(id)
 
@@ -110,7 +166,35 @@ DimReductionServer <- function(id, db_file="seurat.duckdb") {
 }
 
 
-
+#' ViolinPlotOutput
+#'
+#' Creates a UI component for displaying violin plots with options to select count table, gene, and metadata for coloring and splitting.
+#'
+#' @param id A string representing the namespace ID for the UI component.
+#'
+#' @return A UI component (tagList) containing the layout for the violin plot and associated input controls.
+#'
+#' @details This function generates a UI layout for displaying a violin plot. It includes:
+#' - A plot output for the violin plot.
+#' - A selectize input for choosing the count table.
+#' - A selectize input for choosing the gene.
+#' - A selectize input for choosing the metadata column for coloring.
+#' - A selectize input for choosing the metadata column for separating on the x-axis.
+#'
+#' @examples
+#' # Example usage in a Shiny app:
+#' # ui <- fluidPage(
+#' #   ViolinPlotOutput("violin_plot_ui")
+#' # )
+#' #
+#' # server <- function(input, output, session) {
+#' #   # Server logic to populate choices and render plot
+#' # }
+#' #
+#' # shinyApp(ui, server)
+#'
+#' @importFrom shiny NS tagList fluidRow column mainPanel plotOutput selectizeInput
+#' @export
 ViolinPlotOutput <- function(id) {
   ns <- NS(id)
   tagList(
@@ -153,10 +237,38 @@ ViolinPlotOutput <- function(id) {
   )
 }
 
-ViolinPlotServer <- function(id, db_file="seurat.duckdb") {
+#' ViolinPlotServer
+#'
+#' Server logic for handling violin plots in a Shiny app.
+#'
+#' @param id A string representing the namespace ID for the server module.
+#' @param db_file A string representing the path to the database file containing the data. Default is "seurat.duckdb".
+#'
+#' @return A Shiny module server function.
+#'
+#' @details This function sets up the server-side logic for a violin plot module in a Shiny app. It performs the following tasks:
+#' - Reads schema names for count tables from the database.
+#' - Updates the choices for the count table and gene selectize inputs.
+#' - Reads metadata names and updates the choices for coloring and splitting the violin plot.
+#' - Renders the violin plot based on the selected inputs.
+#'
+#' @examples
+#' # Example usage in a Shiny app:
+#' # ui <- fluidPage(
+#' #   ViolinPlotOutput("violin_plot_ui")
+#' # )
+#' #
+#' # server <- function(input, output, session) {
+#' #   ViolinPlotServer("violin_plot_ui", db_file = "path/to/database/file")
+#' # }
+#' #
+#' # shinyApp(ui, server)
+#'
+#' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @export
+ViolinPlotServer <- function(id, db_file = "seurat.duckdb") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
-
     # Read schema names
     count_names <- get_tables_in_schema(db_file, "layer")
 
@@ -179,6 +291,35 @@ ViolinPlotServer <- function(id, db_file="seurat.duckdb") {
   })
 }
 
+#' DotPlotOutput
+#'
+#' Creates a UI component for displaying dot plots with options to select count table, gene, and metadata for separating on the y-axis.
+#'
+#' @param id A string representing the namespace ID for the UI component.
+#'
+#' @return A UI component (tagList) containing the layout for the dot plot and associated input controls.
+#'
+#' @details This function generates a UI layout for displaying a dot plot. It includes:
+#' - A plot output for the dot plot.
+#' - A selectize input for choosing the count table.
+#' - A multi-input for choosing the gene.
+#' - A selectize input for choosing the metadata column for separating on the y-axis.
+#'
+#' @examples
+#' # Example usage in a Shiny app:
+#' # ui <- fluidPage(
+#' #   DotPlotOutput("dot_plot_ui")
+#' # )
+#' #
+#' # server <- function(input, output, session) {
+#' #   # Server logic to populate choices and render plot
+#' # }
+#' #
+#' # shinyApp(ui, server)
+#'
+#' @importFrom shiny NS tagList fluidRow column mainPanel plotOutput selectizeInput
+#' @importFrom shinyWidgets multiInput
+#' @export
 DotPlotOutput <- function(id) {
   ns <- NS(id)
   tagList(
@@ -202,7 +343,7 @@ DotPlotOutput <- function(id) {
           inputId = ns("dot_gene"),
           label = "Select gene:",
           choices = c("Gene"), # Choices will be set in the server function
-          options=list(limit = 10)
+          options = list(limit = 10)
         ),
         selectizeInput(
           inputId = ns("split_y"),
@@ -215,7 +356,37 @@ DotPlotOutput <- function(id) {
   )
 }
 
-DotPlotServer <- function(id, db_file="seurat.duckdb") {
+#' DotPlotServer
+#'
+#' Server logic for handling dot plots in a Shiny app.
+#'
+#' @param id A string representing the namespace ID for the server module.
+#' @param db_file A string representing the path to the database file containing the data. Default is "seurat.duckdb".
+#'
+#' @return A Shiny module server function.
+#'
+#' @details This function sets up the server-side logic for a dot plot module in a Shiny app. It performs the following tasks:
+#' - Reads schema names for count tables from the database.
+#' - Updates the choices for the count table and gene multi-input.
+#' - Reads metadata names and updates the choices for separating the dot plot on the y-axis.
+#' - Renders the dot plot based on the selected inputs.
+#'
+#' @examples
+#' # Example usage in a Shiny app:
+#' # ui <- fluidPage(
+#' #   DotPlotOutput("dot_plot_ui")
+#' # )
+#' #
+#' # server <- function(input, output, session) {
+#' #   DotPlotServer("dot_plot_ui", db_file = "path/to/database/file")
+#' # }
+#' #
+#' # shinyApp(ui, server)
+#'
+#' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @importFrom shinyWidgets updateMultiInput
+#' @export
+DotPlotServer <- function(id, db_file = "seurat.duckdb") {
   ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     # Read schema names

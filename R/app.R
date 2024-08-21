@@ -1,13 +1,29 @@
-## Setup
-library(shiny)
-library(ggplot2)
-library(lazyseurat)
-source("R/ui.R")
-
-# Best practice options for shiny
-options(shiny.sanitize.errors = TRUE)
-
-LazyseuratApp <- function(db="seurat.duckdb") {
+#' LazyseuratAppTemplate
+#'
+#' Creates a Shiny app template for visualizing Seurat data with dimensionality reduction, violin plots, and dot plots.
+#'
+#' @param db A string representing the path to the database file containing the Seurat data. Default is "seurat.duckdb".
+#'
+#' @return A Shiny app object.
+#'
+#' @details This function sets up a Shiny app with the following features:
+#' - A title panel with the app title.
+#' - A tabset panel with three tabs:
+#'   - "Dimensionality Reduction" tab containing the DimReductionOutput UI component.
+#'   - "Violin Plot" tab containing the ViolinPlotOutput UI component.
+#'   - "Dot Plot" tab containing the DotPlotOutput UI component.
+#' - Server logic to handle the corresponding server modules for each tab:
+#'   - DimReductionServer for the "Dimensionality Reduction" tab.
+#'   - ViolinPlotServer for the "Violin Plot" tab.
+#'   - DotPlotServer for the "Dot Plot" tab.
+#'
+#' @examples
+#' # Example usage:
+#' # LazyseuratAppTemplate()
+#'
+#' @importFrom shiny fluidPage titlePanel tabsetPanel tabPanel shinyApp
+#' @export
+LazyseuratAppTemplate <- function(db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat")) {
   ui <- fluidPage(
     titlePanel("lazyseurat-app template"),
     tabsetPanel(
@@ -27,14 +43,13 @@ LazyseuratApp <- function(db="seurat.duckdb") {
   )
 
   server <- function(input, output, session) {
-    DimReductionServer("dim_red", db_file=db)
-    ViolinPlotServer("vln_plot", db_file=db)
-    DotPlotServer("dot_plot", db_file=db)
+    DimReductionServer("dim_red", db_file = db)
+    ViolinPlotServer("vln_plot", db_file = db)
+    DotPlotServer("dot_plot", db_file = db)
   }
 
   shinyApp(ui = ui, server = server)
 }
 
-example_db <- system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat")
 
-LazyseuratApp(example_db)
+#LazyseuratApp(example_db)

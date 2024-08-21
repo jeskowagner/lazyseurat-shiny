@@ -2,7 +2,7 @@ library(dplyr)
 library(ggplot2)
 library(shiny)
 
-base.plot.theme <- function() {
+.base.plot.theme <- function() {
   theme_classic() +
     theme(
       plot.title = element_text(size = 25, hjust = 0.5),
@@ -23,8 +23,8 @@ base.plot.theme <- function() {
     )
 }
 
-plot.theme_vln <- function() {
-  base.plot.theme() +
+.plot.theme_vln <- function() {
+  .base.plot.theme() +
     theme(
       axis.text.x = element_text(
         size = 20,
@@ -80,7 +80,7 @@ VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL, table = "counts") 
 
   p <- ggplot(df, aesthetics) +
     geom_violin(scale = "width") +
-    plot.theme_vln() +
+    .plot.theme_vln() +
     labs(title = gene, y = "Expression Level", x = x)
   return(p)
 }
@@ -175,7 +175,7 @@ DimPlot <- function(db_file,
 
   p <- ggplot(df, aesthetics) +
     geom +
-    base.plot.theme() +
+    .base.plot.theme() +
     labs(title = toupper(reduction_title), x = xlab, y = ylab) +
     theme(aspect.ratio = 1)
 
@@ -205,7 +205,7 @@ DimPlot <- function(db_file,
       percent_expressed = .percent_above(value, 0),
       .groups = "drop"
     ) %>%
-      mutate(across(all_of(group.by), as.factor))
+    mutate(across(all_of(group.by), as.factor))
 }
 
 #' DotPlot
@@ -243,7 +243,7 @@ DotPlot <- function(db_file, gene, split.by = NULL, table = "counts") {
     geom_point() +
     scale_color_gradient(low = "lightgrey", high = "blue") +
     labs(color = "Expression Level", x = "Gene", size = "Percent Expressed") +
-    base.plot.theme() +
+    .base.plot.theme() +
     theme_classic(base_size = 20) +
     theme(text = element_text(color = "black"), axis.title.y = element_blank())
 }
