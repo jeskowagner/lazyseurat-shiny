@@ -22,4 +22,7 @@ Depends:
     janitor,
     stringr,
     duckdb,
-    lazyseurat
+    lazyseurat,
+    gtools,
+    shiny,
+    shinyWidgets

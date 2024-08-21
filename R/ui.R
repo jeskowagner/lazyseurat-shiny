@@ -119,6 +119,7 @@ DimReductionOutput <- function(id) {
 #' # shinyApp(ui, server)
 #'
 #' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @importFrom lazyseurat get_tables_in_schema read_gene_names read_metadata_names
 #' @export
 DimReductionServer <- function(id, db_file = "seurat.duckdb") {
   moduleServer(id, function(input, output, session) {
@@ -265,6 +266,7 @@ ViolinPlotOutput <- function(id) {
 #' # shinyApp(ui, server)
 #'
 #' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @importFrom lazyseurat get_tables_in_schema read_gene_names read_metadata_names
 #' @export
 ViolinPlotServer <- function(id, db_file = "seurat.duckdb") {
   ns <- NS(id)
@@ -385,6 +387,8 @@ DotPlotOutput <- function(id) {
 #'
 #' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
 #' @importFrom shinyWidgets updateMultiInput
+#' @importFrom lazyseurat read_gene_names get_tables_in_schema read_metadata_names
+#' @importFrom gtools mixedsort
 #' @export
 DotPlotServer <- function(id, db_file = "seurat.duckdb") {
   ns <- NS(id)
