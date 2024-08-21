@@ -8,5 +8,16 @@ This Shiny template package uses `lazyseurat` to visualize Seurat objects that h
 ```r
 devtools::install_github("jeskowagner/lazyseurat")
 devtools::install_github("jeskowagner/lazyseurat-shiny")
+```
+
+## Usage
+```r
 lazyseuratShiny::runLazySeuratShiny()
+
+# if you would like to use your own data,
+# first convert your Seurat object to a lazyseurat-compatible DuckDB
+lazyseurat::write_seurat_to_db(seurat_object, "/path/to/your/duckdb")
+
+# then run the Shiny app with the resulting database
+lazyseuratShiny::runLazySeuratShiny("/path/to/your/duckdb")
 ```
