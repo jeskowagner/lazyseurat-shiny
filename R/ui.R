@@ -141,7 +141,7 @@ DimReductionServer <- function(id, db_file = "seurat.duckdb") {
     })
 
     # Observe changes to color_by input and update `color_by_metadata` input
-    metadata_names <- lazyseurat::read_metadata_names(db_file, max_unique_entries = 50, include_numeric = TRUE)
+    metadata_names <- read_metadata_names(db_file, max_unique_entries = 50, include_numeric = TRUE)
     updateSelectizeInput(session, "color_by_metadata", choices = metadata_names, server = TRUE)
 
     # Placeholder for plot output
