@@ -118,13 +118,12 @@ DimReductionOutput <- function(id) {
 #' #
 #' # shinyApp(ui, server)
 #'
-#' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @importFrom shiny moduleServer updateSelectizeInput observeEvent renderPlot
 #' @importFrom lazyseurat get_tables_in_schema
 #'
 #' @export
 DimReductionServer <- function(id, db_file = "seurat.duckdb") {
   moduleServer(id, function(input, output, session) {
-    ns <- NS(id)
 
     # Read schema names
     count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")
@@ -266,11 +265,10 @@ ViolinPlotOutput <- function(id) {
 #' #
 #' # shinyApp(ui, server)
 #'
-#' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @importFrom shiny moduleServer updateSelectizeInput observeEvent renderPlot
 #' @importFrom lazyseurat get_tables_in_schema
 #' @export
 ViolinPlotServer <- function(id, db_file = "seurat.duckdb") {
-  ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     # Read schema names
     count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")
@@ -386,13 +384,12 @@ DotPlotOutput <- function(id) {
 #' #
 #' # shinyApp(ui, server)
 #'
-#' @importFrom shiny moduleServer NS updateSelectizeInput observeEvent renderPlot
+#' @importFrom shiny moduleServer updateSelectizeInput observeEvent renderPlot
 #' @importFrom shinyWidgets updateMultiInput
 #' @importFrom lazyseurat get_tables_in_schema
 #' @importFrom gtools mixedsort
 #' @export
 DotPlotServer <- function(id, db_file = "seurat.duckdb") {
-  ns <- NS(id)
   moduleServer(id, function(input, output, session) {
     # Read schema names
     count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")

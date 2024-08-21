@@ -23,7 +23,7 @@
 #'
 #' @importFrom shiny fluidPage titlePanel tabsetPanel tabPanel shinyApp
 #' @export
-runLazySeuratShiny <- function(db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat"), title="lazyseurat-app template") {
+runLazySeuratShiny <- function(db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat"), title = "lazyseurat-app template") {
   ui <- fluidPage(
     titlePanel(title),
     tabsetPanel(
@@ -50,6 +50,3 @@ runLazySeuratShiny <- function(db = system.file("extdata", "pbmc_small.duckdb", 
 
   shinyApp(ui = ui, server = server)
 }
-
-
-#runLazySeuratShiny()

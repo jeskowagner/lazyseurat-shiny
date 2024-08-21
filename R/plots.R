@@ -61,9 +61,6 @@ library(shiny)
 #' @export
 VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL, table = "counts") {
   req(db_file, gene)
-  # if(!is.null(x) && !is.null(split.by) && x == split.by) {
-  #   x <- NULL
-  # }
   df <- read_gene_expression(db_file, gene = gene, table = table)
 
   if (!is.numeric(df[[gene]])) {
@@ -189,7 +186,7 @@ DimPlot <- function(db_file,
 
 #' @author Seurat Team
 .percent_above <- function(x, threshold) {
-  return(100 * sum(x > threshold, na.rm = T) / length(x))
+  return(100 * sum(x > threshold, na.rm = TRUE) / length(x))
 }
 
 .aggregate_dotplot <- function(df, gene, split.by = NULL) {
