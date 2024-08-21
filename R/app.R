@@ -3,7 +3,7 @@
 #' Creates a Shiny app template for visualizing Seurat data with dimensionality reduction, violin plots, and dot plots.
 #'
 #' @param db A string representing the path to the database file containing the Seurat data. Default is "seurat.duckdb".
-#'
+#' @param title A string representing the title of the Shiny app. Default is "lazyseurat-app template".
 #' @return A Shiny app object.
 #'
 #' @details This function sets up a Shiny app with the following features:
@@ -23,9 +23,9 @@
 #'
 #' @importFrom shiny fluidPage titlePanel tabsetPanel tabPanel shinyApp
 #' @export
-runLazySeuratShiny <- function(db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat")) {
+runLazySeuratShiny <- function(db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat"), title="lazyseurat-app template") {
   ui <- fluidPage(
-    titlePanel("lazyseurat-app template"),
+    titlePanel(title),
     tabsetPanel(
       tabPanel(
         title = "Dimensionality Reduction",
