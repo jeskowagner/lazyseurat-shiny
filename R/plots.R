@@ -193,6 +193,7 @@ DimPlot <- function(db_file,
 }
 
 .aggregate_dotplot <- function(df, gene, split.by = NULL) {
+  require(dplyr)
   group.by <- if (is.null(split.by)) "gene" else c("gene", split.by)
 
   # average expression and percent expressed
