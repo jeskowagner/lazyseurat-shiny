@@ -23,3 +23,8 @@ lazyseuratShiny::runLazySeuratShiny("/path/to/your/duckdb")
 ```
 
 **Note:** because the data that ships with `lazyseurat` is very minimal, not all features of the app will work with the default data. For a full experience, use your own data.
+
+## Pictures
+![A picture of the app showing a Seurat-style PCA plot](img/dim_red.png "PCA Plot")
+![A picture of the app showing a Seurat-style violin plot](img/violin_plot.png "Violin Plot")
+![A picture of the app showing a Seurat-style dot plot](img/dot_plot.png "Dot Plot")
