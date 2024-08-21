@@ -189,6 +189,7 @@ read_gene_names <- function(db_file, table = get_default_count_layer(db_file), o
 #' @importFrom DBI Id
 #' @importFrom lazyseurat get_connection
 #' @importFrom shiny req
+#' @importFrom dplyr select_if %>% collect
 #' @export
 read_metadata_names <- function(db_file, max_unique_entries = 10, include_numeric = TRUE) {
   req(db_file)

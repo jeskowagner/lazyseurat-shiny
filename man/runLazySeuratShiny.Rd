@@ -5,11 +5,14 @@
 \title{runLazySeuratShiny}
 \usage{
 runLazySeuratShiny(
-  db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat")
+  db = system.file("extdata", "pbmc_small.duckdb", package = "lazyseurat"),
+  title = "lazyseurat-app template"
 )
 }
 \arguments{
 \item{db}{A string representing the path to the database file containing the Seurat data. Default is "seurat.duckdb".}
+
+\item{title}{A string representing the title of the Shiny app. Default is "lazyseurat-app template".}
 }
 \value{
 A Shiny app object.
