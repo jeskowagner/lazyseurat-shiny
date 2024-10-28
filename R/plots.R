@@ -145,23 +145,28 @@ DimPlot <- function(db_file,
   } else {
     stop("Invalid reduction type")
   }
-  
+
   # Drop column that do not contain data
   cnames <- cnames[complete.cases(cnames)]
   if (is.null(cnames)) {
     stop("No columns found for reduction")
   }
 
+  # Sort column names
   cnames <- str_sort(cnames, numeric=TRUE)
 
+  # Set which column to use for x and y-axis
   x <- cnames[1]
   y <- cnames[2]
 
+  # Set axis labels
   xlab <- paste0(toupper(reduction), str_extract(x, "[0-9]*"))
   ylab <- paste0(toupper(reduction), str_extract(y, "[0-9]*"))
 
+  # Modify aesthetics to add x and y-axis info
   aesthetics <- aes(x = .data[[x]], y = .data[[y]])
 
+  # Add column for grouping/coloring
   if (!is.null(group.by) && group.by != "") {
     aesthetics <- modifyList(aesthetics, aes(color = .data[[group.by]]))
     if (!group.by %in% colnames(df)) {
@@ -170,11 +175,17 @@ DimPlot <- function(db_file,
         df2[[group.by]] <- log1p(df2[[group.by]])
       }
       df <- merge(df, df2)
+    } else {
+        if(!is.numeric(df[[group.by]])) {
+          df[[group.by]] <- factor(df[[group.by]], levels=str_sort(unique(df[[group.by]]), numeric=TRUE))
+        }
     }
   }
 
+  # Add column for shape
   if (!is.null(shape.by)) aesthetics <- modifyList(aesthetics, aes(shape = .data[[shape.by]]))
 
+  # Shuffle data to avoid overplotting
   if (isTRUE(shuffle)) {
     set.seed(2024)
     df <- df[sample(nrow(df)), ]
@@ -182,14 +193,17 @@ DimPlot <- function(db_file,
     df <- df[order(df[[group.by]]), ]
   }
 
+  # Choose geom based on rasterization
   geom <- if (isTRUE(raster)) geom_scattermore(raster.dpi = raster.dpi, size = 3, ...) else geom_point(size = 3, ...)
 
+  # Construct plot
   p <- ggplot(df, aesthetics) +
     geom +
     .base.plot.theme() +
     labs(title = reduction_title, x = xlab, y = ylab) +
     theme(aspect.ratio = 1)
 
+  # Add color scale
   if (!is.null(group.by) && group.by != "" && is.numeric(df[[group.by]])) {
     p <- p + scale_color_viridis_c()
   }
