@@ -191,7 +191,7 @@ read_gene_names <- function(db_file, table = get_default_count_layer(db_file), o
 #' @importFrom shiny req
 #' @importFrom dplyr select_if %>% collect
 #' @export
-read_metadata_names <- function(db_file, max_unique_entries = 10, include_numeric = TRUE) {
+read_metadata_names <- function(db_file, max_unique_entries = 20, include_numeric = TRUE) {
   req(db_file)
   con <- withr::local_db_connection(get_connection(db_file))
 

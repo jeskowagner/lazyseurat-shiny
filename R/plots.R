@@ -104,6 +104,7 @@ VlnPlot <- function(db_file, gene, x = NULL, split.by = NULL, table = "counts") 
 #'          for large datasets to improve performance.
 #'
 #'
+#' @importFrom stringr str_extract regex str_sort
 #' @examples
 #' # Example usage:
 #  # db_file <- "path/to/database/file"
@@ -133,18 +134,31 @@ DimPlot <- function(db_file,
     raster <- TRUE
   }
 
-  # Colnames for PCA are capitalized, not for UMAP
-  reduction_title <- reduction
+  # Colnames may or may not be captialized
+  reduction_title <- toupper(reduction)
   if (reduction == "pca") {
     reduction <- "PC"
-    reduction_title <- "PCA"
+    cnames <- str_extract(colnames(df), regex("PC_[0-9]*", ignore_case=T))
+  } else if (reduction == "umap") {
+    reduction <- "UMAP"
+    cnames <- str_extract(colnames(df), regex("UMAP_[0-9]*", ignore_case=T))
+  } else {
+    stop("Invalid reduction type")
+  }
+  
+  # Drop column that do not contain data
+  cnames <- cnames[complete.cases(cnames)]
+  if (is.null(cnames)) {
+    stop("No columns found for reduction")
   }
 
-  x <- paste0(reduction, "_1")
-  y <- paste0(reduction, "_2")
+  cnames <- str_sort(cnames, numeric=TRUE)
 
-  xlab <- paste0(toupper(reduction), "1")
-  ylab <- paste0(toupper(reduction), "1")
+  x <- cnames[1]
+  y <- cnames[2]
+
+  xlab <- paste0(toupper(reduction), str_extract(x, "[0-9]*"))
+  ylab <- paste0(toupper(reduction), str_extract(y, "[0-9]*"))
 
   aesthetics <- aes(x = .data[[x]], y = .data[[y]])
 
@@ -173,7 +187,7 @@ DimPlot <- function(db_file,
   p <- ggplot(df, aesthetics) +
     geom +
     .base.plot.theme() +
-    labs(title = toupper(reduction_title), x = xlab, y = ylab) +
+    labs(title = reduction_title, x = xlab, y = ylab) +
     theme(aspect.ratio = 1)
 
   if (!is.null(group.by) && group.by != "" && is.numeric(df[[group.by]])) {

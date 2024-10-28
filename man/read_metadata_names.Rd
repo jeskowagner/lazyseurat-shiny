@@ -4,7 +4,7 @@
 \alias{read_metadata_names}
 \title{read_metadata_names}
 \usage{
-read_metadata_names(db_file, max_unique_entries = 10, include_numeric = TRUE)
+read_metadata_names(db_file, max_unique_entries = 20, include_numeric = TRUE)
 }
 \arguments{
 \item{db_file}{A string representing the path to the database file.}

@@ -277,7 +277,7 @@ ViolinPlotServer <- function(id, db_file = "seurat.duckdb") {
     updateSelectizeInput(session, "expr_input", choices = count_names, selected = count_names[1], server = TRUE)
     updateSelectizeInput(session, "violin_gene", choices = read_gene_names(db_file), selected = read_gene_names(db_file)[1], server = TRUE)
 
-    metadata_columns <- read_metadata_names(db_file, include_numeric = TRUE, max_unique_entries = 10)
+    metadata_columns <- read_metadata_names(db_file, include_numeric = TRUE, max_unique_entries = 20)
     metadata_columns <- metadata_columns[metadata_columns != "barcode"]
     updateSelectizeInput(session, "color_by", choices = metadata_columns, server = TRUE)
     updateSelectizeInput(session, "split_x", choices = metadata_columns, server = TRUE)
