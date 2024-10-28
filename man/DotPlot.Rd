@@ -4,7 +4,7 @@
 \alias{DotPlot}
 \title{DotPlot}
 \usage{
-DotPlot(db_file, gene, split.by = NULL, table = "counts")
+DotPlot(db_file, gene, split.by = NULL, table = "data")
 }
 \arguments{
 \item{db_file}{A string representing the path to the database file containing gene expression data.}
@@ -13,7 +13,7 @@ DotPlot(db_file, gene, split.by = NULL, table = "counts")
 
 \item{split.by}{An optional string representing the variable to split the y-axis by. Default is NULL.}
 
-\item{table}{A string representing the table name in the database from which to read the gene expression data. Default is "counts".}
+\item{table}{A string representing the table name in the database from which to read the gene expression data. Default is "data".}
 }
 \value{
 A ggplot2 object representing the dot plot of gene expression.

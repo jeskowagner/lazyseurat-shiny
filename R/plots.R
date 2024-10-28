@@ -217,9 +217,11 @@ DimPlot <- function(db_file,
   return(100 * sum(x > threshold, na.rm = TRUE) / length(x))
 }
 
-.aggregate_dotplot <- function(df, gene, split.by = NULL) {
+.aggregate_dotplot <- function(df, gene, split.by = NULL, exp=TRUE) {
   require(dplyr)
   group.by <- if (is.null(split.by)) "gene" else c("gene", split.by)
+
+  avg.fun = if (isTRUE(exp)) function(x) mean(expm1(x)) else mean
 
   # average expression and percent expressed
   df %>%
@@ -227,7 +229,7 @@ DimPlot <- function(db_file,
     mutate(value = as.numeric(value)) %>%
     group_by(!!!syms(group.by)) %>%
     summarise(
-      avg_exp = mean(expm1(value)),
+      avg_exp = avg.fun(value),
       percent_expressed = .percent_above(value, 0),
       .groups = "drop"
     ) %>%
@@ -241,7 +243,7 @@ DimPlot <- function(db_file,
 #' @param db_file A string representing the path to the database file containing gene expression data.
 #' @param gene A string representing the gene for which the expression data is to be plotted.
 #' @param split.by An optional string representing the variable to split the y-axis by. Default is NULL.
-#' @param table A string representing the table name in the database from which to read the gene expression data. Default is "counts".
+#' @param table A string representing the table name in the database from which to read the gene expression data. Default is "data".
 #'
 #' @return A ggplot2 object representing the dot plot of gene expression.
 #'
@@ -249,11 +251,19 @@ DimPlot <- function(db_file,
 #'          and constructs a ggplot object with the specified aesthetics. The dot plot shows the average expression level and the
 #'          percentage of cells expressing the gene.
 #'
-DotPlot <- function(db_file, gene, split.by = NULL, table = "counts") {
+DotPlot <- function(db_file, gene, split.by = NULL, table = "data") {
   req(db_file, gene, split.by, table)
+  # Default values in Seurat
+  dot.scale <- 6
+  scale.min <- NA
+  scale.max <- NA
+
+  # Get data
   df <- read_gene_expression(db_file, gene = gene, table = table)
 
-  df_agg <- .aggregate_dotplot(df, gene, split.by)
+  # Aggregate into dots
+  is_logged = table != "counts"
+  df_agg <- .aggregate_dotplot(df, gene = gene, split.by = split.by, exp = is_logged)
 
   aesthetics <- aes(
     y = "Expression",
@@ -263,12 +273,26 @@ DotPlot <- function(db_file, gene, split.by = NULL, table = "counts") {
   )
 
   if (!is.null(split.by)) {
+    if(!is.numeric(df[[split.by]])) {
+      df_agg[[split.by]] <- factor(df_agg[[split.by]],
+                                   levels=str_sort(
+                                       unique(
+                                           df_agg[[split.by]]
+                                           ),
+                                       numeric=TRUE,
+                                       decreasing=TRUE))
+    }
     aesthetics <- modifyList(aesthetics, aes(y = .data[[split.by]]))
   }
+
+  # z-score
+  df_agg[["avg_exp"]] <- scale(df_agg[["avg_exp"]])
+
   ggplot(df_agg, aesthetics) +
     geom_point() +
+    scale_radius(range = c(0, dot.scale), limits = c(scale.min, scale.max)) +
     scale_color_gradient(low = "lightgrey", high = "blue") +
-    labs(color = "Expression Level", x = "Gene", size = "Percent Expressed") +
+    labs(color = "Average Expression", x = "Gene", size = "Percent Expressed") +
     .base.plot.theme() +
     theme_classic(base_size = 20) +
     theme(text = element_text(color = "black"), axis.title.y = element_blank())
