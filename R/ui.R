@@ -395,7 +395,8 @@ DotPlotServer <- function(id, db_file = "seurat.duckdb") {
     count_names <- lazyseurat::get_tables_in_schema(db_file, "layer")
 
     # Update selectizeInput choices
-    updateSelectizeInput(session, "expr_input", choices = count_names, selected = count_names[1], server = TRUE)
+    selected_table <- ifelse("data" %in% count_names, "data", count_names[1])
+    updateSelectizeInput(session, "expr_input", choices = count_names, selected = selected_table, server = TRUE)
     gene_name <- gtools::mixedsort(read_gene_names(db_file, ordered_by_average = FALSE))
     shinyWidgets::updateMultiInput(session, "dot_gene", choices = gene_name, selected = gene_name[1:3])
 

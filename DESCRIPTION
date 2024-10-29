@@ -1,6 +1,6 @@
 Package: lazyseuratShiny
 Title: Template for Shiny app to visualise single-cell data with lazyseurat
-Version: 0.2.3
+Version: 0.2.4
 Authors@R:
     person("Jesko", "Wagner", , "jesko.wagner@ed.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9805-7192"))
